@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecto: Sistema de Control de Caudal con Placa de Orificio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0056b3;
+            --primary-dark: #004085;
+            --secondary: #4CAF50;
+            --accent: #FF9800;
+            --light: #f0f8ff;
+            --dark: #333;
+            --gray: #777;
+            --light-gray: #f9f9f9;
+            --white: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: #f5f7fa;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            padding: 2rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+        
+        /* Project Info */
+        .project-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .info-card {
+            background: var(--white);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+        
+        .info-card h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        /* Main Content Styles */
+        .content-section {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .content-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--light);
+            display: flex;
+            align-items: center;
+        }
+        
+        h2 i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+        
+        .summary {
+            background-color: var(--light);
+            border-left: 5px solid var(--primary);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .summary p {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        
+        /* Grid Styles */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .card {
+            background: linear-gradient(135deg, var(--white) 0%, var(--light-gray) 100%);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid #eaeaea;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card h3 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        .card .value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: var(--primary-dark);
+            margin: 0.8rem 0;
+        }
+        
+        .card .unit {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+        th, td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        th {
+            background-color: var(--primary);
+            color: var(--white);
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background-color: var(--light);
+        }
+        
+        tr:hover {
+            background-color: #e6f2ff;
+        }
+        
+        /* Status Indicators */
+        .status {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 500;
+            margin-right: 0.5rem;
+        }
+        
+        .status-safe {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status-warning {
+            background-color: #fff8e1;
+            color: #f57c00;
+        }
+        
+        /* Diagram Placeholder */
+        .diagram {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        
+        .diagram-placeholder {
+            width: 100%;
+            height: 250px;
+            background-color: #90caf9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: 1rem 0;
+        }
+        
+        /* Formula Styles */
+        .formula {
+            background-color: #f8f9fa;
+            border: 1px solid #eaecf0;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            overflow-x: auto;
+        }
+        
+        .formula-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        /* Revision History */
+        .revision-history {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        
+        .revision-history th {
+            background-color: var(--primary-dark);
+        }
+        
+        /* Footer Styles */
+        footer {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            color: var(--white);
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .footer-meta {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .content-section {
+                padding: 1.5rem;
+            }
+            
+            .project-info {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                color: black;
+                font-size: 12pt;
+            }
+            
+            header, footer, .card {
+                break-inside: avoid;
+            }
+            
+            .card {
+                border: 1px solid #000;
+            }
+            
+            .grid-container {
+                display: block;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1><i class="fas fa-tint"></i> Sistema de Control de Caudal</h1>
+                <p class="subtitle">Diseño e implementación de una placa de orificio para optimización de procesos industriales</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Project Information -->
+        <div class="project-info">
+            <div class="info-card">
+                <h3><i class="fas fa-clipboard-list"></i> Proyecto</h3>
+                <p>Sistema de Reducción de Caudal en Línea de Emulsión</p>
+            </div>
+            <div class="info-card">
+                <h3><i class="fas fa-user-tie"></i> Cliente</h3>
+                <p>General Paint Pintura Industrial</p>
+            </div>
+            <div class="info-card">
+                <h3><i class="fas fa-flask"></i> Fluido</h3>
+                <p>Agua Potable para Emulsión en T 503</p>
+            </div>
+            <div class="info-card">
+                <h3><i class="fas fa-file-alt"></i> Documento</h3>
+                <p>MC-PO-001 | Revisión: 02</p>
+            </div>
+        </div>
+
+        <main>
+            <section class="content-section">
+                <h2><i class="fas fa-bullseye"></i> Resumen Ejecutivo</h2>
+                <div class="summary">
+                    <p>Este documento detalla el diseño de una <strong>placa de orificio de restricción</strong> para reducir un caudal de agua existente de 9-12 m³/h a un caudal de diseño controlado de <strong>3 m³/h</strong> en una tubería de acero inoxidable de 2" Cédula 10S, asegurando una presión de salida de 1.5 bar manométricos.</p>
+                </div>
+                <p>El cálculo se fundamenta en la norma internacional <strong>ISO 5167-2</strong>, determinando un orificio con diámetro de <strong>9.40 mm</strong>. Se ha verificado que no existe riesgo de cavitación y se han establecido requisitos críticos de instalación para garantizar precisión e integridad del sistema.</p>
+            </section>
+
+            <section class="content-section">
+                <h2><i class="fas fa-database"></i> Bases de Diseño y Datos de Entrada</h2>
+                
+                <h3>Propiedades del Fluido (Agua Potable a 20 °C)</h3>
+                <div class="grid-container">
+                    <div class="card">
+                        <i class="fas fa-weight-hanging" style="font-size: 2rem; color: #0056b3;"></i>
+                        <h3>Densidad (ρ)</h3>
+                        <p class="value">998.2 <span class="unit">kg/m³</span></p>
+                    </div>
+                    <div class="card">
+                        <i class="fas fa-tint" style="font-size: 2rem; color: #0056b3;"></i>
+                        <h3>Viscosidad Dinámica (μ)</h3>
+                        <p class="value">1.002×10⁻³ <span class="unit">Pa·s</span></p>
+                    </div>
+                    <div class="card">
+                        <i class="fas fa-temperature-low" style="font-size: 2rem; color: #0056b3;"></i>
+                        <h3>Presión de Vapor (P_v)</h3>
+                        <p class="value">0.0234 <span class="unit">bar</span></p>
+                    </div>
+                </div>
+
+                <h3>Especificaciones de la Tubería</h3>
+                <table>
+                    <tr>
+                        <th>Parámetro</th>
+                        <th>Valor</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Material</strong></td>
+                        <td>Acero Inoxidable 304</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Diámetro Nominal</strong></td>
+                        <td>2 pulgadas</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cédula (Schedule)</strong></td>
+                        <td>10S</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Diámetro Interno (D)</strong></td>
+                        <td>52.5 mm (0.0525 m)</td>
+                    </tr>
+                </table>
+
+                <h3>Condiciones del Proceso</h3>
+                <table>
+                    <tr>
+                        <th>Parámetro</th>
+                        <th>Valor</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Caudal de Diseño (Q)</strong></td>
+                        <td>3 m³/h (8.333 × 10⁻⁴ m³/s)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Presión Aguas Arriba (P₁)</strong></td>
+                        <td>3.5 bar (manométrica) / 4.24 bar (absoluta)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Presión Aguas Abajo (P₂)</strong></td>
+                        <td>1.5 bar (manométrica) / 2.24 bar (absoluta)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Caída de Presión Diferencial (ΔP)</strong></td>
+                        <td>2.0 bar (200,000 Pa)</td>
+                    </tr>
+                </table>
+            </section>
+
+            <section class="content-section">
+                <h2><i class="fas fa-calculator"></i> Fundamento Teórico y Metodología</h2>
+                <p>El dimensionamiento de la placa de orificio se rige por los principios de la mecánica de fluidos, específicamente la <strong>Ecuación de Bernoulli</strong>, que relaciona la presión, la velocidad y la altura en un fluido en movimiento. La metodología y las ecuaciones empleadas se adhieren estrictamente a la norma <strong>ISO 5167</strong>.</p>
+                
+                <div class="formula">
+                    <div class="formula-title">Ecuación fundamental para flujo a través del orificio</div>
+                    Q = C_d · A_o · √[1/(1-β⁴)] · √(2ΔP/ρ)
+                </div>
+                
+                <p>Donde:</p>
+                <ul>
+                    <li><strong>Q:</strong> Caudal volumétrico (m³/s)</li>
+                    <li><strong>C_d:</strong> Coeficiente de descarga (factor adimensional)</li>
+                    <li><strong>A_o:</strong> Área transversal del orificio (m²)</li>
+                    <li><strong>β:</strong> Relación de diámetros (d/D), adimensional</li>
+                    <li><strong>ΔP:</strong> Caída de presión diferencial a través de las tomas de presión (Pa)</li>
+                    <li><strong>ρ:</strong> Densidad del fluido (kg/m³)</li>
+                </ul>
+                
+                <p>Dado que el coeficiente C_d depende de la relación de diámetros β y del Número de Reynolds (Re_D), los cuales a su vez dependen del diámetro desconocido (d), la solución se obtiene mediante un <strong>proceso iterativo</strong>.</p>
+            </section>
+
+            <section class="content-section">
+                <h2><i class="fas fa-cogs"></i> Secuencia de Cálculo y Verificaciones</h2>
+                
+                <h3>Velocidad y Número de Reynolds</h3>
+                <p>Primero, se determina el régimen de flujo en la tubería para asegurar la aplicabilidad de la norma.</p>
+                
+                <div class="grid-container">
+                    <div class="card">
+                        <i class="fas fa-tachometer-alt" style="font-size: 2rem; color: #0056b3;"></i>
+                        <h3>Velocidad en la Tubería (v)</h3>
+                        <p class="value">0.385 <span class="unit">m/s</span></p>
+                    </div>
+                    <div class="card">
+                        <i class="fas fa-water" style="font-size: 2rem; color: #0056b3;"></i>
+                        <h3>Número de Reynolds (Re_D)</h3>
+                        <p class="value">20,115</p>
+                    </div>
+                </div>
+                
+                <p>Un Re_D > 4,000 confirma que el flujo es <strong>completamente turbulento</strong>, cumpliendo una condición esencial de la norma ISO 5167.</p>
+                
+                <h3>Cálculo Iterativo del Diámetro del Orificio (d)</h3>
+                <p>Se sigue un proceso iterativo hasta que el valor del diámetro converge:</p>
+                <ol>
+                    <li><strong>Asumir un valor inicial</strong> para el coeficiente de descarga (C_d = 0.61)</li>
+                    <li>Despejar y <strong>calcular un diámetro inicial</strong> (d) de la ecuación de caudal</li>
+                    <li>Con este diámetro, <strong>recalcular la relación β</strong> y refinar el valor de C_d</li>
+                    <li>Repetir los pasos hasta que el valor de d no cambie significativamente</li>
+                </ol>
+                
+                <p>La solución final converge en la tercera iteración, arrojando un diámetro de <strong>9.40 mm</strong>.</p>
+            </section>
+
+            <section class="content-section">
+                <h2><i class="fas fa-ruler"></i> Resultados y Especificaciones de Diseño</h2>
+                <p>La placa de orificio deberá ser fabricada e instalada conforme a las siguientes especificaciones finales.</p>
+                
+                <table>
+                    <tr>
+                        <th>Parámetro</th>
+                        <th>Símbolo</th>
+                        <th>Valor</th>
+                        <th>Unidad</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Diámetro del Orificio</strong></td>
+                        <td>d</td>
+                        <td><strong>9.40</strong></td>
+                        <td>mm</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Relación de Diámetros</strong></td>
+                        <td>β</td>
+                        <td>0.179</td>
+                        <td>Adimensional</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Coeficiente de Descarga</strong></td>
+                        <td>C_d</td>
+                        <td>0.60</td>
+                        <td>Adimensional</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Caída de Presión Permanente</strong></td>
+                        <td>ΔP_perm</td>
+                        <td>~1.64</td>
+                        <td>bar</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Material Recomendado</strong></td>
+                        <td>-</td>
+                        <td>Acero Inox. 304</td>
+                        <td>N/A</td>
+                    </tr>
+                </table>
+                
+                <div class="summary">
+                    <p><strong>Nota sobre la Caída de Presión Permanente (ΔP_perm):</strong> Es importante distinguir la caída de presión diferencial (ΔP=2.0 bar), usada para el cálculo, de la pérdida de energía neta o permanente en el sistema. Esta última es menor debido a la recuperación parcial de presión aguas abajo de la placa y representa el verdadero coste energético de la instalación.</p>
+                </div>
+            </section>
+
+            <section class="content-section">
+                <h2><i class="fas fa-clipboard-check"></i> Análisis de Riesgos y Verificaciones Críticas</h2>
+                
+                <h3>Análisis de Cavitación</h3>
+                <p>La cavitación es la formación y colapso de burbujas de vapor en un líquido, un fenómeno destructivo que ocurre si la presión local cae por debajo de la presión de vapor del fluido.</p>
+                
+                <div class="grid-container">
+                    <div class="card">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #0056b3;"></i>
+                        <h3>Presión Absoluta Mínima</h3>
+                        <p class="value">2.24 <span class="unit">bar</span></p>
+                    </div>
+                    <div class="card">
+                        <i class="fas fa-temperature-high" style="font-size: 2rem; color: #0056b3;"></i>
+                        <h3>Presión de Vapor del Agua</h3>
+                        <p class="value">0.0234 <span class="unit">bar</span></p>
+                    </div>
+                    <div class="card">
+                        <i class="fas fa-check-circle" style="font-size: 2rem; color: #4CAF50;"></i>
+                        <h3>Factor de Seguridad</h3>
+                        <p class="value">95x</p>
+                    </div>
+                </div>
+                
+                <p>La presión en el punto más desfavorable del sistema es <strong>más de 95 veces superior a la presión de vapor</strong>, por lo que se concluye que el <strong>riesgo de cavitación es nulo</strong>.</p>
+                
+                <h3>Velocidad del Chorro y Potencial de Erosión</h3>
+                <p>El fluido se acelera significativamente al pasar por el orificio, alcanzando una velocidad de chorro de aproximadamente <strong>12.0 m/s</strong>.</p>
+                
+                <div class="summary">
+                    <p>Aunque esta velocidad es alta, el riesgo de erosión es bajo, ya que el fluido es agua potable con un bajo contenido de sólidos abrasivos. El uso de Acero Inoxidable 304 proporciona una excelente resistencia al desgaste en estas condiciones.</p>
+                </div>
+            </section>
+
+            <section class="content-section">
+                <h2><i class="fas fa-tools"></i> Requisitos de Instalación (según ISO 5167)</h2>
+                <p>Para que el dispositivo funcione según lo calculado, la instalación debe respetar estrictamente los siguientes puntos:</p>
+                
+                <ul>
+                    <li><strong>Tramos Rectos de Tubería:</strong> Se debe garantizar un tramo de tubería recto, libre de perturbaciones (codos, válvulas, etc.), de al menos <strong>10 diámetros (≈ 53 cm) aguas arriba</strong> de la placa y <strong>5 diámetros (≈ 27 cm) aguas abajo</strong>.</li>
+                    <li><strong>Calidad del Orificio:</strong> El borde de entrada del orificio debe ser <strong>afilado, sin rebabas ni redondeos</strong>. La superficie de la placa debe ser lisa y limpia.</li>
+                    <li><strong>Tolerancia de Fabricación:</strong> El diámetro de 9.40 mm debe fabricarse con una tolerancia ajustada (se recomienda ±0.05 mm) para asegurar la precisión del caudal final.</li>
+                </ul>
+                
+                <div class="diagram">
+                    <h3>Esquema de Instalación Recomendada</h3>
+                    <div class="diagram-placeholder">
+                        <i class="fas fa-ruler-combined" style="font-size: 3rem; margin-right: 1rem;"></i>
+                        Representación de los tramos rectos requeridos según ISO 5167
+                    </div>
+                </div>
+            </section>
+
+            <section class="content-section">
+                <h2><i class="fas fa-check-double"></i> Conclusión</h2>
+                <p>Para lograr la reducción de caudal a <strong>3 m³/h</strong> con una presión de salida de 1.5 bar (manométrica), se debe fabricar e instalar una <strong>placa de orificio de Acero Inoxidable 304 con un diámetro de perforación de 9.40 mm</strong> en la tubería especificada.</p>
+                
+                <div class="summary">
+                    <p>El diseño es robusto, seguro (sin riesgo de cavitación) y su éxito depende del cumplimiento de las directrices de instalación de la norma ISO 5167.</p>
+                </div>
+            </section>
+
+            <section class="content-section">
+                <h2><i class="fas fa-history"></i> Control de Revisiones</h2>
+                <table class="revision-history">
+                    <tr>
+                        <th>Revisión</th>
+                        <th>Fecha</th>
+                        <th>Descripción de Cambios</th>
+                        <th>Elaborado por</th>
+                        <th>Revisado por</th>
+                    </tr>
+                    <tr>
+                        <td>01</td>
+                        <td>10/09/2025</td>
+                        <td>Emisión inicial del documento</td>
+                        <td>GHGR</td>
+                        <td>JMT</td>
+                    </tr>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>Documentación técnica de ingeniería - Libre de derechos de autor</p>
+                <p class="footer-meta">Memoria de Cálculo N° MC-PO-001 | 10 de septiembre de 2025</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
